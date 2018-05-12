@@ -12,9 +12,11 @@ import java.util.regex.Pattern;
 public class AddMethods {
     //针对某一个Controller进行改写
     FindControllers findControllers=new FindControllers();
-    public void addMethods(String url){
+    public void addMethods(String url) throws IOException {
         List<File> controllers=findControllers.getAllControllers(url);
-
+        for(File f:controllers){
+            addOnOneController(f);
+        }
     }
 
     /**
@@ -46,7 +48,7 @@ public class AddMethods {
 
                 insertAnnotation(getInsertPointer(lastPointer,methodLine),annotation,controllerFile);
 
-                fallback+="\n"+getSpaces(spaceNum)+authority+" "+returnTye+" "+methodName+"Fallback("+getParameters(methodLine)+"){\n"+getSpaces(spaceNum+4)+"return null;\n"+getSpaces(spaceNum)+"}\n"+"\n";
+                fallback+="\n"+getSpaces(spaceNum)+authority+" "+returnTye+" "+methodName+"Fallback("+parameter+"){\n"+getSpaces(spaceNum+4)+ReturnType.getFallbackReturns(returnTye)+"\n"+getSpaces(spaceNum)+"}\n"+"\n";
 
             }
         }
@@ -82,9 +84,6 @@ public class AddMethods {
             }
         }
         result.add(space+"");
-//        for(int j=0;j<result.size();j++){
-//            System.out.println(result.get(j));
-//        }
         return result;
     }
     public static String getParameters(String methodLine){
