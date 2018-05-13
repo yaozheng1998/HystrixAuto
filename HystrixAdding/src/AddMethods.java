@@ -17,8 +17,29 @@ public class AddMethods {
         for(File f:controllers){
             addOnOneController(f);
         }
+        //applications需要在getAllControllers的基础上获得；所以需要写在后面
+        List<File> applications=findControllers.applications;
+        for(File a:applications){
+            modifyApplication(a);
+        }
     }
 
+    /**
+     * 对项目的启动类添加断路器支持
+     * @param applicationFile
+     * @throws IOException
+     */
+    public void modifyApplication(File applicationFile) throws IOException {
+        RandomAccessFile raf=new RandomAccessFile(applicationFile,"rw");
+        String line=null;
+        while((line=raf.readLine())!=null){
+            if(line.contains("@SpringBootApplication")){
+                long pointer=raf.getFilePointer();
+                String annotation="@EnableHystrix\n";
+                insertAnnotation(pointer,annotation,applicationFile);
+            }
+        }
+    }
     /**
      * 对一个controller代码进行处理
      * @param controllerFile

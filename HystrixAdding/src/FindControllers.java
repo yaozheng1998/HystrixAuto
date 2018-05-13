@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
  * @Date 2018/5/11
  */
 public class FindControllers {
+    static List<File> applications=new ArrayList<>();
     /**
      * 因为递归方法难以返回数据
      */
@@ -20,15 +21,18 @@ public class FindControllers {
     public List<File> getAllControllers(String url){
         List<File> files=new ArrayList<>();
         getAllFiles(url);
-        String pattern=".*Controller.*";
+        String pattern=".*Controller\\.java";
+        String apattern=".*Application\\.java";
         for(File f:controllerFiles){
             if(Pattern.matches(pattern,f.getName())){
                 files.add(f);
+            }else if(Pattern.matches(apattern,f.getName())){
+                applications.add(f);
             }
         }
-        for(File f1:files){
-            System.out.println(f1.getName());
-        }
+//        for(File f1:applications){
+//            System.out.println(f1.getName());
+//        }
         return files;
     }
 
