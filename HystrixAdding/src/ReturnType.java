@@ -41,8 +41,14 @@ public class ReturnType {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        code=code.substring(0,code.length()-1);
-        code+=");\n";
+        if(code.charAt(code.length()-1)!=','){
+            //可能是（，也就是说参数都不是基本类型；或者压根没找到构造方法
+            code="return null;";
+        }else {
+            code = code.substring(0, code.length() - 1);
+            code+=");\n";
+        }
+
         return code;
     }
     public static void main(String[]args) throws IOException {

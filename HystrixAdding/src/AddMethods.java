@@ -29,6 +29,7 @@ public class AddMethods {
         RandomAccessFile raf=new RandomAccessFile(controllerFile,"rw");
         String line=null;
         String lastLine=null;
+        int signal=0;//表示该代码还未加过熔断
         while((line=raf.readLine())!=null){
             lastLine=line;
             //找到方法所在的行数及代码
@@ -36,26 +37,33 @@ public class AddMethods {
                 long lastPointer=raf.getFilePointer();
 
                 String methodLine=raf.readLine();
-                List<String> splits=splitMethodLine(methodLine);
-                String authority=splits.get(0);
-                String returnTye=splits.get(1);
-                String methodName=splits.get(2);
-                String parameter=getParameters(methodLine);
-                int spaceNum=Integer.parseInt(splits.get(splits.size()-1));
+                if(!methodLine.contains("@HystrixCommand")) {
+                    List<String> splits = splitMethodLine(methodLine);
+                    String authority = splits.get(0);
+                    String returnTye = splits.get(1);
+                    String methodName = splits.get(2);
+                    String parameter = getParameters(methodLine);
+                    int spaceNum = Integer.parseInt(splits.get(splits.size() - 1));
 
-                //这里缩进减1，是因为raf的pointer已经有一位了
-                String annotation=getSpaces(spaceNum-1)+"@HystrixCommand(fallbackMethod = \""+ methodName +"Fallback\")\n ";
+                    //这里缩进减1，是因为raf的pointer已经有一位了
+                    String annotation = getSpaces(spaceNum - 1) + "@HystrixCommand(fallbackMethod = \"" + methodName + "Fallback\")\n ";
 
-                insertAnnotation(getInsertPointer(lastPointer,methodLine),annotation,controllerFile);
+                    insertAnnotation(getInsertPointer(lastPointer, methodLine), annotation, controllerFile);
 
-                fallback+="\n"+getSpaces(spaceNum)+authority+" "+returnTye+" "+methodName+"Fallback("+parameter+"){\n"+getSpaces(spaceNum+4)+ReturnType.getFallbackReturns(returnTye)+"\n"+getSpaces(spaceNum)+"}\n"+"\n";
+                    fallback += "\n" + getSpaces(spaceNum) + authority + " " + returnTye + " " + methodName + "Fallback(" + parameter + "){\n" + getSpaces(spaceNum + 4) + ReturnType.getFallbackReturns(returnTye) + "\n" + getSpaces(spaceNum) + "}\n" + "\n";
+                }else{
+                    signal=1;
+                }
 
             }
         }
 //        raf.setLength(raf.length()+fallback.length());
-        fallback+="}";
-        raf.seek(raf.getFilePointer()-lastLine.length()*2);
-        raf.write(fallback.getBytes());
+
+        if(signal==0) {
+            fallback += "}";
+            raf.seek(raf.getFilePointer() - lastLine.length() * 2);
+            raf.write(fallback.getBytes());
+        }
         raf.close();
     }
     public static void main(String[]args) throws IOException {
@@ -90,6 +98,9 @@ public class AddMethods {
         String result=methodLine.substring(methodLine.indexOf('(')+1,methodLine.indexOf(')'));
         if(result.contains("@RequestBody")){
             result=result.replace("@RequestBody ","");
+        }
+        if(result.contains("@PathVariable")){
+            result=result.replace("@PathVariable ","");
         }
 //        System.out.print(result);
         return result;
