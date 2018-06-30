@@ -60,7 +60,8 @@ public class FindControllers {
     }
     public static void main(String[]args){
         FindControllers fd=new FindControllers();
-        fd.getAllControllers("/Users/YZ/Desktop/inventory_service");
+        fd.getAllControllers("/Users/YZ/Desktop/test/user1/account_service");
+        System.out.println(controllerFiles);
     }
 
 }

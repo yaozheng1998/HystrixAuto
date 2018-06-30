@@ -17,7 +17,6 @@ public class CategoryController {
     //list/add
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
-    @HystrixCommand(fallbackMethod = "addFallback")
     public ResultVO add(@RequestBody CategoryInfo categoryInfo){
         if (categoryService.addCategory(categoryInfo) == 1){
             return new ResultVO("add a category", 1);
@@ -26,20 +25,8 @@ public class CategoryController {
     }
 
     @RequestMapping(value = "/list", method = RequestMethod.GET)
-    @HystrixCommand(fallbackMethod = "getListFallback")
     public CategoryListInfo getList(){
         return categoryService.getList();
-    }
-
-    public ResultVO addFallback(CategoryInfo categoryInfo){
-        return new ResultVO("默认字符串",-1);
-
-    }
-
-
-    public CategoryListInfo getListFallback(){
-        return new CategoryListInfo);
-
     }
 
 }
